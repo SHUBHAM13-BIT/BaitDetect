@@ -11,3 +11,5 @@ generated_reports/*
 database/*.db
 .env
 *.log
+cloudflared.exe
+
