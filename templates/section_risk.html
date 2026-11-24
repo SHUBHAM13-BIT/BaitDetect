@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Risk Assessment Framework // BaitDetect{% endblock %}
+{% block header_title %}Risk Scoring Engine & Classification Model{% endblock %}
+{% block header_subtitle %}Transparent 0-100 composite risk scoring matrix, category boundaries, and deduplication logic{% endblock %}
+
+{% block content %}
+<!-- Risk Tier Cards -->
+<div class="row g-3 mb-4">
+  <div class="col">
+    <div class="cyber-card text-center border-top border-4 border-success h-100">
+      <span class="badge badge-safe mb-2">0 – 20</span>
+      <h5 class="text-white fw-bold">Safe / Low Risk</h5>
+      <p class="text-muted small mb-0">Legitimate communications with valid authentication and no high-risk markers.</p>
+    </div>
+  </div>
+  <div class="col">
+    <div class="cyber-card text-center border-top border-4 border-info h-100">
+      <span class="badge badge-neutral mb-2">21 – 40</span>
+      <h5 class="text-white fw-bold">Moderate Risk</h5>
+      <p class="text-muted small mb-0">Missing optional records or mild marketing heuristics; exercise routine caution.</p>
+    </div>
+  </div>
+  <div class="col">
+    <div class="cyber-card text-center border-top border-4 border-warning h-100">
+      <span class="badge badge-suspicious mb-2">41 – 60</span>
+      <h5 class="text-white fw-bold">Suspicious</h5>
+      <p class="text-muted small mb-0">Mismatched headers, shorteners, or artificial urgency; out-of-band verification recommended.</p>
+    </div>
+  </div>
+  <div class="col">
+    <div class="cyber-card text-center border-top border-4 border-warning h-100">
+      <span class="badge badge-high mb-2">61 – 80</span>
+      <h5 class="text-white fw-bold">High Risk</h5>
+      <p class="text-muted small mb-0">Multiple severe indicators: spoofed display names, credential lures, or unauthenticated relays.</p>
+    </div>
+  </div>
+  <div class="col">
+    <div class="cyber-card text-center border-top border-4 border-danger h-100">
+      <span class="badge badge-critical mb-2">81 – 100</span>
+      <h5 class="text-white fw-bold">Critical Risk</h5>
+      <p class="text-muted small mb-0">Potential active phishing: executable attachment disguises, brand impersonation, or DMARC failure.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Architecture & Deduplication Explanation -->
+<div class="row g-4 mb-4">
+  <div class="col-lg-6">
+    <div class="cyber-card h-100">
+      <div class="cyber-card-header">
+        <h3 class="cyber-card-title"><i class="bi bi-calculator text-cyan"></i> Category Scoring Caps & Normalization</h3>
+      </div>
+      <p class="text-muted small">To prevent single vectors from distorting composite scores and to eliminate double-counting, each category is bounded by a ceiling cap:</p>
+      <div class="table-responsive">
+        <table class="cyber-table">
+          <thead>
+            <tr>
+              <th>Threat Vector</th>
+              <th>Maximum Cap</th>
+              <th>Primary Triggers</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong class="text-white">Header & Authentication</strong></td>
+              <td><span class="badge bg-secondary">40 pts</span></td>
+              <td>SPF/DKIM/DMARC failure, From vs Reply-To mismatch, spoofing</td>
+            </tr>
+            <tr>
+              <td><strong class="text-white">URL Intelligence</strong></td>
+              <td><span class="badge bg-secondary">45 pts</span></td>
+              <td>Anchor text mismatch, IP hosts, brand typosquatting, shorteners</td>
+            </tr>
+            <tr>
+              <td><strong class="text-white">Attachment Analysis</strong></td>
+              <td><span class="badge bg-secondary">45 pts</span></td>
+              <td>Double extensions, direct executables (.exe, .vbs), macros</td>
+            </tr>
+            <tr>
+              <td><strong class="text-white">Content Heuristics</strong></td>
+              <td><span class="badge bg-secondary">35 pts</span></td>
+              <td>Urgent deadlines, credential harvesting, fake invoices, BEC wire lure</td>
+            </tr>
+            <tr>
+              <td><strong class="text-white">Threat Intelligence</strong></td>
+              <td><span class="badge bg-secondary">40 pts</span></td>
+              <td>URLhaus listing, VirusTotal malicious detections</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="cyber-card h-100">
+      <div class="cyber-card-header">
+        <h3 class="cyber-card-title"><i class="bi bi-shield-shaded text-cyan"></i> Critical Override Rule & Heuristic Disclaimer</h3>
+      </div>
+      <div class="d-flex flex-column gap-3 small">
+        <div class="p-3 rounded" style="background-color: rgba(239,68,68,0.1); border: 1px solid var(--threat-critical);">
+          <strong class="text-danger"><i class="bi bi-exclamation-octagon me-1"></i>Critical Indicator Escalation:</strong>
+          <p class="text-muted mb-0 mt-1">If two or more Critical severity indicators are detected simultaneously (e.g. an executable double extension alongside a spoofed brand domain), the composite score is automatically elevated to at least <strong>85/100 (Critical)</strong> regardless of other clean sections.</p>
+        </div>
+        <div class="p-3 rounded" style="background-color: rgba(6,182,212,0.1); border: 1px solid var(--accent-cyan);">
+          <strong class="text-cyan"><i class="bi bi-info-circle me-1"></i>Scientific Heuristic Transparency:</strong>
+          <p class="text-muted mb-0 mt-1">BaitDetect uses transparent, rule-based static heuristics. While effective at intercepting common and sophisticated campaigns, heuristic scoring evaluates behavioral patterns and provides probabilistic risk indicators, not definitive mathematical proof of malicious intent.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

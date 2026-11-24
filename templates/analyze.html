@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Email Threat Analysis // BaitDetect{% endblock %}
+{% block header_title %}Email Ingestion & Security Analysis{% endblock %}
+{% block header_subtitle %}Submit raw emails, RFC 822 files, or headers for automated threat scanning{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="cyber-card">
+      <div class="cyber-card-header d-flex justify-content-between align-items-center">
+        <h3 class="cyber-card-title"><i class="bi bi-shield-lock text-cyan"></i> Email Content Submission</h3>
+        <span class="badge badge-safe"><i class="bi bi-shield-shaded me-1"></i>Static Analysis Only</span>
+      </div>
+
+      <form id="analysisForm" action="{{ url_for('submit_analysis') }}" method="POST" enctype="multipart/form-data">
+        <div id="analysisErrorAlert" class="alert alert-danger py-2 px-3 d-none mb-3"></div>
+
+        <div class="mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <label class="form-label text-muted small fw-bold mb-0">RAW RFC 822 EMAIL / HEADERS / BODY</label>
+            <span class="text-dim small">UTF-8 Plaintext or MIME</span>
+          </div>
+          <textarea id="rawEmailContent" name="raw_content" rows="12" class="cyber-textarea"
+                    placeholder="Paste email source here...&#10;&#10;From: sender@domain.com&#10;To: recipient@company.com&#10;Subject: Urgent Security Notice&#10;..."></textarea>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label text-muted small fw-bold mb-1">OR UPLOAD EMAIL FILE (.EML, .TXT, .MSG)</label>
+          <div id="emailDropZone" class="drop-zone py-4">
+            <i class="bi bi-cloud-arrow-up display-5 text-muted mb-2 d-block"></i>
+            <span class="text-muted d-block small">Drag & drop your .eml or .txt file here, or click to browse files</span>
+            <input type="file" id="emailFileInput" name="email_file" class="d-none" accept=".eml,.txt,.msg,.header">
+          </div>
+          <div id="selectedFileInfo"></div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center pt-2">
+          <button type="submit" id="submitAnalysisBtn" class="btn-cyber-primary py-2 px-4">
+            <i class="bi bi-cpu me-1"></i> Run Complete Phishing Analysis
+          </button>
+          <button type="button" class="btn-cyber-secondary btn-sm" onclick="document.getElementById('rawEmailContent').value = ''; clearSelectedFile();">
+            Clear Form
+          </button>
+        </div>
+
+        <div id="analysisLoadingState" class="d-none text-center py-4">
+          <div class="spinner-border text-info me-2" role="status"></div>
+          <span class="text-cyan fw-bold">Executing static header, URL, attachment, and content evaluation...</span>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="cyber-card mb-4">
+      <div class="cyber-card-header">
+        <h4 class="cyber-card-title"><i class="bi bi-file-earmark-medical text-cyan"></i> Synthetic Test Samples</h4>
+      </div>
+      <p class="text-muted small mb-3">Load pre-configured test scenarios to verify detection behavior:</p>
+      <div class="d-grid gap-2">
+        <button class="btn btn-sm btn-outline-danger text-start py-2" onclick="loadSampleEmail('credential_phish')">
+          <i class="bi bi-lock-fill me-2"></i><strong>1. Credential Harvesting</strong>
+          <small class="d-block text-dim">Brand spoofing, fake PayPal alert, malicious link</small>
+        </button>
+        <button class="btn btn-sm btn-outline-warning text-start py-2" onclick="loadSampleEmail('bec_wire')">
+          <i class="bi bi-cash-coin me-2"></i><strong>2. Executive BEC Wire Fraud</strong>
+          <small class="d-block text-dim">CEO impersonation, urgent wire transfer, no links</small>
+        </button>
+        <button class="btn btn-sm btn-outline-danger text-start py-2" onclick="loadSampleEmail('malware_invoice')">
+          <i class="bi bi-bug-fill me-2"></i><strong>3. Malicious Invoice Payload</strong>
+          <small class="d-block text-dim">Double extension (.pdf.exe) attachment disguise</small>
+        </button>
+        <button class="btn btn-sm btn-outline-success text-start py-2" onclick="loadSampleEmail('legitimate_newsletter')">
+          <i class="bi bi-check-circle-fill me-2"></i><strong>4. Clean Legitimate Email</strong>
+          <small class="d-block text-dim">Verified GitHub security advisory with valid SPF/DKIM</small>
+        </button>
+      </div>
+    </div>
+
+    <div class="cyber-card">
+      <div class="cyber-card-header">
+        <h4 class="cyber-card-title"><i class="bi bi-shield-shaded text-cyan"></i> Safe Ingestion Policy</h4>
+      </div>
+      <ul class="list-unstyled text-muted small mb-0">
+        <li class="mb-2"><i class="bi bi-check2 text-info me-2"></i><strong>Zero Execution:</strong> No code is run or scripts detonated on the server.</li>
+        <li class="mb-2"><i class="bi bi-check2 text-info me-2"></i><strong>Passive URL Intelligence:</strong> Links are examined syntactically and cross-checked via reputation feeds without browser navigation.</li>
+        <li><i class="bi bi-check2 text-info me-2"></i><strong>Memory Hashing:</strong> Attachment payloads remain in RAM for SHA-256 calculation.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

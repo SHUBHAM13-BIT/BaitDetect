@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Reports & Exports // BaitDetect{% endblock %}
+{% block header_title %}Cybersecurity Report Center{% endblock %}
+{% block header_subtitle %}Automated PDF Incident Reports, JSON forensic exports, and CSV data summaries{% endblock %}
+
+{% block content %}
+<div class="row g-4 mb-4">
+  <div class="col-md-4">
+    <div class="cyber-card text-center py-4">
+      <i class="bi bi-file-earmark-pdf text-danger display-5 mb-2 d-block"></i>
+      <h4 class="text-white fw-bold mb-1">Audit-Ready PDF Reports</h4>
+      <p class="text-muted small mb-3">Executive summaries with full RFC 822 envelope audit, SPF/DKIM/DMARC tables, and SOC guidance.</p>
+      <span class="badge badge-safe">ReportLab 5.1 Powered</span>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="cyber-card text-center py-4">
+      <i class="bi bi-filetype-json text-info display-5 mb-2 d-block"></i>
+      <h4 class="text-white fw-bold mb-1">Forensic JSON Exports</h4>
+      <p class="text-muted small mb-3">Machine-readable JSON schema containing extracted indicators, URLs, hashes, and routing hops.</p>
+      <span class="badge badge-safe">SIEM & SOAR Compatible</span>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="cyber-card text-center py-4">
+      <i class="bi bi-file-earmark-spreadsheet text-success display-5 mb-2 d-block"></i>
+      <h4 class="text-white fw-bold mb-1">CSV Threat Summary</h4>
+      <p class="text-muted small mb-3">Batch spreadsheet export of all processed analyses for threat intelligence reporting and trends.</p>
+      <a href="{{ url_for('export_all_csv') }}" class="btn-cyber-primary btn-sm mt-1">
+        <i class="bi bi-download me-1"></i> Download All CSV
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="cyber-card">
+  <div class="cyber-card-header">
+    <h3 class="cyber-card-title"><i class="bi bi-folder2-open text-cyan"></i> Generated Reports Archive</h3>
+  </div>
+
+  {% if analyses %}
+  <div class="table-responsive">
+    <table class="cyber-table">
+      <thead>
+        <tr>
+          <th>Analysis ID</th>
+          <th>Subject</th>
+          <th>Risk Score</th>
+          <th>PDF Incident Report</th>
+          <th>JSON Forensic File</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in analyses %}
+        <tr>
+          <td><code class="cyber-code-inline">{{ a.id }}</code></td>
+          <td class="text-truncate" style="max-width: 250px;">{{ a.subject or '(No Subject)' }}</td>
+          <td>
+            <span class="badge {% if a.risk_score > 80 %}badge-critical{% elif a.risk_score > 60 %}badge-high{% elif a.risk_score > 40 %}badge-suspicious{% else %}badge-safe{% endif %}">
+              {{ a.risk_score }}/100 ({{ a.risk_level }})
+            </span>
+          </td>
+          <td>
+            <a href="{{ url_for('download_pdf', analysis_id=a.id) }}" class="btn btn-sm btn-outline-danger">
+              <i class="bi bi-file-earmark-pdf me-1"></i> Download PDF
+            </a>
+          </td>
+          <td>
+            <a href="{{ url_for('export_json', analysis_id=a.id) }}" class="btn btn-sm btn-outline-info">
+              <i class="bi bi-filetype-json me-1"></i> View JSON
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="text-muted text-center py-4 mb-0">No reports generated yet. Analyze an email to automatically produce incident reports.</p>
+  {% endif %}
+</div>
+{% endblock %}

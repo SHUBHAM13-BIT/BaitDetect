@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Attachment Analysis // BaitDetect{% endblock %}
+{% block header_title %}Email Attachment Security Inspection{% endblock %}
+{% block header_subtitle %}Safe, in-memory metadata inspection, double-extension flags, and SHA-256 fingerprinting{% endblock %}
+
+{% block content %}
+<div class="row g-4 mb-4">
+  <div class="col-md-3">
+    <div class="cyber-card text-center py-3">
+      <i class="bi bi-file-earmark-binary text-danger display-6 mb-2 d-block"></i>
+      <h5 class="text-white fw-bold mb-1">Direct Executables</h5>
+      <p class="text-muted small mb-0">.exe, .scr, .vbs, .js, .hta, .bat scripts capable of direct arbitrary code execution.</p>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="cyber-card text-center py-3">
+      <i class="bi bi-files text-warning display-6 mb-2 d-block"></i>
+      <h5 class="text-white fw-bold mb-1">Double Extensions</h5>
+      <p class="text-muted small mb-0"><code>invoice.pdf.exe</code> tricks users by masquerading as a harmless PDF document.</p>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="cyber-card text-center py-3">
+      <i class="bi bi-file-earmark-excel text-danger display-6 mb-2 d-block"></i>
+      <h5 class="text-white fw-bold mb-1">Macro Documents</h5>
+      <p class="text-muted small mb-0">.docm, .xlsm containing VBA macros designed to download external trojan loaders.</p>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="cyber-card text-center py-3">
+      <i class="bi bi-disc text-info display-6 mb-2 d-block"></i>
+      <h5 class="text-white fw-bold mb-1">Disk Containers</h5>
+      <p class="text-muted small mb-0">.iso, .img, .vhd used to evade Windows Mark-of-the-Web (MOTW) security checks.</p>
+    </div>
+  </div>
+</div>
+
+<div class="cyber-card">
+  <div class="cyber-card-header d-flex justify-content-between align-items-center">
+    <h3 class="cyber-card-title"><i class="bi bi-paperclip text-cyan"></i> Aggregated Attachments Across Scanned Incidents</h3>
+    <span class="text-muted small">Total Files: {{ total_attachments_count }}</span>
+  </div>
+
+  {% if attachments_list %}
+  <div class="table-responsive">
+    <table class="cyber-table">
+      <thead>
+        <tr>
+          <th>Analysis ID</th>
+          <th>Filename</th>
+          <th>Type</th>
+          <th>Size</th>
+          <th>SHA-256 Hash</th>
+          <th>Risk Level</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for att in attachments_list %}
+        <tr>
+          <td><code class="cyber-code-inline">{{ att.analysis_id }}</code></td>
+          <td><strong>{{ att.filename }}</strong></td>
+          <td><code>{{ att.content_type }}</code></td>
+          <td>{{ att.size_formatted }}</td>
+          <td>
+            <span class="cyber-code-inline" title="{{ att.sha256 }}">{{ att.sha256[:20] }}...</span>
+          </td>
+          <td>
+            <span class="badge {% if att.is_suspicious %}badge-critical{% else %}badge-safe{% endif %}">
+              {% if att.is_suspicious %}DANGEROUS{% else %}BENIGN{% endif %}
+            </span>
+          </td>
+          <td>
+            <a href="{{ url_for('view_analysis', analysis_id=att.analysis_id) }}" class="btn btn-sm btn-cyber-secondary py-1 px-2">
+              <i class="bi bi-eye"></i> View
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="text-muted text-center py-4 mb-0">No attachments identified in current records. Analyze an email with attachments to see safe metadata inspection.</p>
+  {% endif %}
+</div>
+{% endblock %}

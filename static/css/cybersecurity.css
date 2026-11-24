@@ -1,0 +1,392 @@
+/* BaitDetect - Professional Cybersecurity Dark Theme */
+:root {
+  --bg-dark: #090d16;
+  --bg-card: #0f172a;
+  --bg-card-hover: #17233f;
+  --bg-surface: #1e293b;
+  --border-color: #27354f;
+  --border-focus: #0ea5e9;
+
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+
+  --accent-cyan: #06b6d4;
+  --accent-blue: #3b82f6;
+  --threat-critical: #ef4444;
+  --threat-high: #f97316;
+  --threat-suspicious: #f59e0b;
+  --threat-safe: #10b981;
+  --glow-cyan: rgba(6, 182, 212, 0.2);
+  --glow-red: rgba(239, 68, 68, 0.2);
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Sidebar & Navigation */
+.cyber-sidebar {
+  background-color: #0c1322;
+  border-right: 1px solid var(--border-color);
+  min-height: 100vh;
+  width: 260px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+.main-content {
+  margin-left: 260px;
+  padding: 24px 32px;
+  flex: 1;
+}
+
+.brand-header {
+  padding: 22px 20px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-logo-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #0284c7, #06b6d4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 800;
+  box-shadow: 0 0 15px var(--glow-cyan);
+}
+
+.brand-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #fff;
+  margin: 0;
+}
+
+.brand-badge {
+  font-size: 0.65rem;
+  padding: 2px 6px;
+  background-color: rgba(6, 182, 212, 0.15);
+  color: var(--accent-cyan);
+  border: 1px solid var(--accent-cyan);
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.nav-link-cyber {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 20px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-left: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.nav-link-cyber:hover {
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.03);
+  border-left-color: var(--accent-cyan);
+}
+
+.nav-link-cyber.active {
+  color: #fff;
+  background-color: rgba(6, 182, 212, 0.08);
+  border-left-color: var(--accent-cyan);
+  font-weight: 600;
+}
+
+/* Cards & Containers */
+.cyber-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.cyber-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 14px;
+  margin-bottom: 16px;
+}
+
+.cyber-card-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Metrics & Stat Cards */
+.metric-box {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.metric-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+}
+
+.metric-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.metric-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Threat Badges */
+.badge-critical {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: var(--threat-critical);
+  border: 1px solid var(--threat-critical);
+}
+
+.badge-high {
+  background-color: rgba(249, 115, 22, 0.15);
+  color: var(--threat-high);
+  border: 1px solid var(--threat-high);
+}
+
+.badge-suspicious {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: var(--threat-suspicious);
+  border: 1px solid var(--threat-suspicious);
+}
+
+.badge-safe {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: var(--threat-safe);
+  border: 1px solid var(--threat-safe);
+}
+
+.badge-neutral {
+  background-color: rgba(148, 163, 184, 0.15);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+}
+
+/* Threat Indicator Cards */
+.indicator-item {
+  border-left: 4px solid var(--text-muted);
+  background-color: rgba(255, 255, 255, 0.02);
+  border-radius: 4px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  border-top: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  transition: transform 0.2s;
+}
+
+.indicator-item:hover {
+  transform: translateX(3px);
+}
+
+.indicator-item.sev-Critical {
+  border-left-color: var(--threat-critical);
+}
+.indicator-item.sev-High {
+  border-left-color: var(--threat-high);
+}
+.indicator-item.sev-Medium {
+  border-left-color: var(--threat-suspicious);
+}
+.indicator-item.sev-Low {
+  border-left-color: var(--accent-cyan);
+}
+
+/* Form Controls */
+.cyber-input, .cyber-textarea {
+  background-color: #0b1120;
+  border: 1px solid var(--border-color);
+  color: #fff;
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-family: inherit;
+  width: 100%;
+}
+
+.cyber-textarea {
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 0.85rem;
+}
+
+.cyber-input:focus, .cyber-textarea:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 10px var(--glow-cyan);
+  background-color: #0d1527;
+  color: #fff;
+}
+
+/* Custom Buttons */
+.btn-cyber-primary {
+  background: linear-gradient(135deg, #0284c7, #06b6d4);
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  padding: 9px 20px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-cyber-primary:hover {
+  box-shadow: 0 0 18px var(--glow-cyan);
+  color: #fff;
+  opacity: 0.95;
+}
+
+.btn-cyber-secondary {
+  background-color: var(--bg-surface);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-cyber-secondary:hover {
+  background-color: var(--bg-card-hover);
+  color: #fff;
+}
+
+/* Tables */
+.cyber-table {
+  width: 100%;
+  color: var(--text-main);
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.cyber-table th {
+  background-color: #0b1120;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-color);
+  font-weight: 600;
+}
+
+.cyber-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  font-size: 0.88rem;
+  vertical-align: middle;
+}
+
+.cyber-table tr:hover td {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* Monospace Code blocks */
+.cyber-code-inline {
+  background-color: #070a12;
+  border: 1px solid var(--border-color);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Consolas', monospace;
+  font-size: 0.8rem;
+  color: var(--accent-cyan);
+}
+
+/* Gauge & Risk Score Display */
+.risk-meter-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.risk-score-value {
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.risk-score-label {
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Drag & Drop File Zone */
+.drop-zone {
+  border: 2px dashed var(--border-color);
+  border-radius: 8px;
+  padding: 30px;
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.01);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.drop-zone:hover, .drop-zone.dragover {
+  border-color: var(--accent-cyan);
+  background-color: rgba(6, 182, 212, 0.04);
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .cyber-sidebar {
+    width: 70px;
+  }
+  .cyber-sidebar .brand-title,
+  .cyber-sidebar .brand-badge,
+  .cyber-sidebar .nav-link-cyber span {
+    display: none;
+  }
+  .main-content {
+    margin-left: 70px;
+    padding: 16px;
+  }
+}

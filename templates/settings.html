@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Settings & Threat Feeds // BaitDetect{% endblock %}
+{% block header_title %}System Configuration & Threat Feeds{% endblock %}
+{% block header_subtitle %}Manage API integrations, DNS lookup toggles, and engine thresholds{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="cyber-card">
+      <div class="cyber-card-header">
+        <h3 class="cyber-card-title"><i class="bi bi-sliders text-cyan"></i> API Keys & Integrations</h3>
+      </div>
+
+      <form action="{{ url_for('save_settings') }}" method="POST">
+        <div class="mb-4">
+          <label class="form-label text-white fw-bold">VirusTotal API Key (Optional)</label>
+          <input type="password" name="virustotal_api_key" class="cyber-input mb-1"
+                 value="{{ settings.virustotal_api_key or '' }}"
+                 placeholder="Enter 64-character VirusTotal v3 API key">
+          <small class="text-muted d-block">Enables automated live URL and domain scanning against 70+ threat engines. If blank, local heuristics and URLhaus are utilized.</small>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label text-white fw-bold">Google Safe Browsing API Key (Optional)</label>
+          <input type="password" name="google_safe_browsing_api_key" class="cyber-input mb-1"
+                 value="{{ settings.google_safe_browsing_api_key or '' }}"
+                 placeholder="Enter Google Safe Browsing v4 API key">
+          <small class="text-muted d-block">Enables checks against Google's real-time phishing and deceptive site lists.</small>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label text-white fw-bold">Engine Behavior & Network Lookups</label>
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" name="enable_live_dns" id="enableDnsCheck"
+                   {% if settings.enable_live_dns == 'true' %}checked{% endif %}>
+            <label class="form-check-label text-white" for="enableDnsCheck">Perform Live DNS Lookups (SPF TXT & DMARC _dmarc queries)</label>
+          </div>
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" name="enable_threat_intel" id="enableThreatCheck"
+                   {% if settings.enable_threat_intel == 'true' %}checked{% endif %}>
+            <label class="form-check-label text-white" for="enableThreatCheck">Query URLhaus Threat Database (Abuse.ch non-executing API)</label>
+          </div>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" name="strict_mode" id="strictModeCheck"
+                   {% if settings.strict_mode == 'true' %}checked{% endif %}>
+            <label class="form-check-label text-white" for="strictModeCheck">Strict Security Scoring Mode (Treat missing SPF as elevated anomaly)</label>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-cyber-primary">
+          <i class="bi bi-save me-1"></i> Save Configuration
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="cyber-card mb-4">
+      <div class="cyber-card-header">
+        <h4 class="cyber-card-title"><i class="bi bi-shield-check text-cyan"></i> Security Controls</h4>
+      </div>
+      <ul class="list-unstyled mb-0 small text-muted">
+        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i><strong>Non-Executing Sandbox:</strong> URLs and attachments are parsed statically; never detonated or visited.</li>
+        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i><strong>File Validation:</strong> Strictly enforces allowed file extensions (.eml, .txt, .msg).</li>
+        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i><strong>In-Memory Hashing:</strong> Attachment SHA-256 hashes computed without writing binary files to disk.</li>
+        <li><i class="bi bi-check-circle-fill text-success me-2"></i><strong>Database Safety:</strong> Parameterized SQLite queries preventing SQL injection.</li>
+      </ul>
+    </div>
+
+    <div class="cyber-card">
+      <div class="cyber-card-header">
+        <h4 class="cyber-card-title"><i class="bi bi-info-circle text-cyan"></i> Environment Info</h4>
+      </div>
+      <table class="table table-sm table-borderless text-muted small mb-0">
+        <tbody>
+          <tr>
+            <td>Python:</td>
+            <td class="text-white text-end">3.12.10 (64-bit)</td>
+          </tr>
+          <tr>
+            <td>Host Platform:</td>
+            <td class="text-white text-end">Windows 11</td>
+          </tr>
+          <tr>
+            <td>Database Engine:</td>
+            <td class="text-white text-end">SQLite 3</td>
+          </tr>
+          <tr>
+            <td>Report Generator:</td>
+            <td class="text-white text-end">ReportLab 5.1</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

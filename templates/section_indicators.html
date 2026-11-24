@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Threat Indicators // BaitDetect{% endblock %}
+{% block header_title %}Threat Indicator Catalog & Triage Feed{% endblock %}
+{% block header_subtitle %}Heuristic findings, severity rankings, evidence captures, and mitigation actions{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="cyber-card text-center py-2">
+      <span class="text-danger fw-bold fs-4">{{ counts.critical }}</span>
+      <span class="text-muted small d-block">Critical Severity</span>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="cyber-card text-center py-2">
+      <span class="text-warning fw-bold fs-4">{{ counts.high }}</span>
+      <span class="text-muted small d-block">High Severity</span>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="cyber-card text-center py-2">
+      <span class="text-info fw-bold fs-4">{{ counts.medium }}</span>
+      <span class="text-muted small d-block">Medium Severity</span>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="cyber-card text-center py-2">
+      <span class="text-success fw-bold fs-4">{{ counts.low }}</span>
+      <span class="text-muted small d-block">Low Severity</span>
+    </div>
+  </div>
+</div>
+
+<div class="cyber-card">
+  <div class="cyber-card-header d-flex justify-content-between align-items-center">
+    <h3 class="cyber-card-title"><i class="bi bi-exclamation-triangle text-cyan"></i> Recorded Threat Indicators Across Workspace</h3>
+    <span class="text-muted small">Total Logged: {{ indicators | length }}</span>
+  </div>
+
+  {% if indicators %}
+    {% for ind in indicators %}
+    <div class="indicator-item sev-{{ ind.severity }}">
+      <div class="d-flex justify-content-between align-items-center mb-1 flex-wrap gap-2">
+        <div>
+          <span class="badge {% if ind.severity == 'Critical' %}badge-critical{% elif ind.severity == 'High' %}badge-high{% elif ind.severity == 'Medium' %}badge-suspicious{% else %}badge-safe{% endif %} me-2">
+            {{ ind.severity | upper }}
+          </span>
+          <span class="badge bg-secondary me-2">{{ ind.category }}</span>
+          <strong class="text-white">{{ ind.name }}</strong>
+        </div>
+        <div>
+          <a href="{{ url_for('view_analysis', analysis_id=ind.analysis_id) }}" class="btn btn-sm btn-cyber-secondary py-0 px-2 me-2" style="font-size: 0.75rem;">
+            ID: {{ ind.analysis_id }}
+          </a>
+          <span class="text-muted small">Score Weight: <strong class="text-cyan">+{{ ind.assigned_score }}</strong></span>
+        </div>
+      </div>
+
+      <p class="text-muted small mb-2">{{ ind.description }}</p>
+
+      <div class="p-2 mb-2 rounded" style="background-color: #080d1a; border: 1px solid var(--border-color); font-size: 0.82rem;">
+        <strong class="text-cyan"><i class="bi bi-search me-1"></i>Evidence:</strong>
+        <span class="text-white">{{ ind.evidence }}</span>
+      </div>
+
+      <div class="text-muted" style="font-size: 0.8rem;">
+        <strong class="text-warning"><i class="bi bi-shield-check me-1"></i>SOC Action:</strong> {{ ind.recommended_action }}
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+  <p class="text-muted text-center py-4 mb-0">No threat indicators logged yet. Run an analysis on suspicious emails to populate this feed.</p>
+  {% endif %}
+</div>
+{% endblock %}

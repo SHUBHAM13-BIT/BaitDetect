@@ -1,0 +1,488 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis {{ analysis.id }} // BaitDetect{% endblock %}
+{% block header_title %}Threat Investigation: {{ analysis.id }}{% endblock %}
+{% block header_subtitle %}Detailed forensic analysis and threat indicator breakdown{% endblock %}
+
+{% block content %}
+<!-- Top Action Bar -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <span class="badge {% if 'Critical' in analysis.risk_level %}badge-critical{% elif 'High' in analysis.risk_level %}badge-high{% elif 'Suspicious' in analysis.risk_level %}badge-suspicious{% else %}badge-safe{% endif %} py-2 px-3 fs-6">
+      <i class="bi bi-shield-exclamation me-1"></i> {{ analysis.risk_level | upper }} (Score: {{ analysis.risk_score }}/100)
+    </span>
+    <span class="ms-2 text-muted small"><i class="bi bi-clock me-1"></i>Analyzed: {{ analysis.created_at[:19].replace('T', ' ') }} UTC</span>
+  </div>
+
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('download_pdf', analysis_id=analysis.id) }}" class="btn-cyber-primary btn-sm">
+      <i class="bi bi-file-earmark-pdf"></i> Download PDF Report
+    </a>
+    <a href="{{ url_for('export_json', analysis_id=analysis.id) }}" class="btn-cyber-secondary btn-sm">
+      <i class="bi bi-filetype-json"></i> Export JSON
+    </a>
+    <form action="{{ url_for('delete_analysis_endpoint', analysis_id=analysis.id) }}" method="POST" onsubmit="return confirm('Permanently delete this analysis record?');" style="display:inline;">
+      <button type="submit" class="btn btn-sm btn-outline-danger">
+        <i class="bi bi-trash"></i>
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Executive Threat Banner -->
+<div class="cyber-card mb-4 border-start border-4 {% if 'Critical' in analysis.risk_level %}border-danger{% elif 'High' in analysis.risk_level %}border-warning{% elif 'Suspicious' in analysis.risk_level %}border-warning{% else %}border-success{% endif %}">
+  <div class="row align-items-center">
+    <div class="col-md-9">
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <span class="badge bg-secondary text-uppercase">{{ analysis.threat_category }}</span>
+        <h4 class="mb-0 text-white fw-bold">{{ analysis.subject or '(No Subject)' }}</h4>
+      </div>
+      <p class="text-muted mb-2" style="font-size: 0.9rem;">{{ analysis.summary_notes }}</p>
+      <div class="d-flex flex-wrap gap-3 text-muted" style="font-size: 0.8rem;">
+        <span><strong class="text-white">From:</strong> {{ analysis.sender }}</span>
+        {% if analysis.reply_to %}
+        <span><strong class="text-white">Reply-To:</strong> {{ analysis.reply_to }}</span>
+        {% endif %}
+        <span><strong class="text-white">Originating IP:</strong> {{ analysis.sending_ip }}</span>
+      </div>
+    </div>
+    <div class="col-md-3 text-center border-start border-secondary pt-3 pt-md-0">
+      <div class="risk-meter-container">
+        <span class="risk-score-value {% if analysis.risk_score > 80 %}text-danger{% elif analysis.risk_score > 60 %}text-warning{% elif analysis.risk_score > 40 %}text-warning{% else %}text-success{% endif %}">
+          {{ analysis.risk_score }}
+        </span>
+        <span class="text-muted small">OUT OF 100</span>
+        <span class="badge mt-2 {% if 'Critical' in analysis.risk_level %}badge-critical{% elif 'High' in analysis.risk_level %}badge-high{% elif 'Suspicious' in analysis.risk_level %}badge-suspicious{% else %}badge-safe{% endif %}">
+          {{ analysis.risk_level }}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Navigation Tabs -->
+<ul class="nav nav-tabs border-secondary mb-4" id="analysisTabs" role="tablist">
+  <li class="nav-item">
+    <button class="nav-link text-muted active" id="tab-overview-btn" data-bs-toggle="tab" data-bs-target="#tab-overview" type="button">
+      <i class="bi bi-speedometer2 me-1"></i> Risk Assessment
+    </button>
+  </li>
+  <li class="nav-item">
+    <button class="nav-link text-muted" id="tab-headers-btn" data-bs-toggle="tab" data-bs-target="#tab-headers" type="button">
+      <i class="bi bi-diagram-3 me-1"></i> Header Analysis
+      <span class="badge bg-secondary ms-1">{{ analysis.routing_hops }} hops</span>
+    </button>
+  </li>
+  <li class="nav-item">
+    <button class="nav-link text-muted" id="tab-urls-btn" data-bs-toggle="tab" data-bs-target="#tab-urls" type="button">
+      <i class="bi bi-link-45deg me-1"></i> URL Intelligence
+      <span class="badge {% if analysis.suspicious_url_count > 0 %}bg-danger{% else %}bg-secondary{% endif %} ms-1">{{ analysis.url_count }}</span>
+    </button>
+  </li>
+  <li class="nav-item">
+    <button class="nav-link text-muted" id="tab-attachments-btn" data-bs-toggle="tab" data-bs-target="#tab-attachments" type="button">
+      <i class="bi bi-paperclip me-1"></i> Attachments
+      <span class="badge {% if analysis.suspicious_attachment_count > 0 %}bg-danger{% else %}bg-secondary{% endif %} ms-1">{{ analysis.attachment_count }}</span>
+    </button>
+  </li>
+  <li class="nav-item">
+    <button class="nav-link text-muted" id="tab-indicators-btn" data-bs-toggle="tab" data-bs-target="#tab-indicators" type="button">
+      <i class="bi bi-exclamation-triangle me-1"></i> Threat Indicators
+      <span class="badge bg-danger ms-1">{{ analysis.indicators | length }}</span>
+    </button>
+  </li>
+  <li class="nav-item">
+    <button class="nav-link text-muted" id="tab-raw-btn" data-bs-toggle="tab" data-bs-target="#tab-raw" type="button">
+      <i class="bi bi-code-slash me-1"></i> Raw Email
+    </button>
+  </li>
+</ul>
+
+<!-- Tab Contents -->
+<div class="tab-content" id="analysisTabsContent">
+
+  <!-- 1. RISK ASSESSMENT TAB -->
+  <div class="tab-pane fade show active" id="tab-overview" role="tabpanel">
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="cyber-card h-100">
+          <div class="cyber-card-header">
+            <h4 class="cyber-card-title"><i class="bi bi-shield-check text-cyan"></i> Vector Subscores</h4>
+          </div>
+          <div style="height: 240px;">
+            <canvas id="vectorRadarChart"></canvas>
+          </div>
+          <div class="mt-3 table-responsive">
+            <table class="table table-sm table-borderless text-white mb-0" style="font-size: 0.85rem;">
+              <tbody>
+                <tr>
+                  <td><i class="bi bi-envelope text-info me-2"></i>Header & Spoofing</td>
+                  <td class="text-end fw-bold">{{ (analysis.category_breakdown and analysis.category_breakdown.header) or 0 }} / 40</td>
+                </tr>
+                <tr>
+                  <td><i class="bi bi-link-45deg text-warning me-2"></i>URL & Domain Phish</td>
+                  <td class="text-end fw-bold">{{ (analysis.category_breakdown and analysis.category_breakdown.url) or 0 }} / 45</td>
+                </tr>
+                <tr>
+                  <td><i class="bi bi-paperclip text-danger me-2"></i>Attachment Payload</td>
+                  <td class="text-end fw-bold">{{ (analysis.category_breakdown and analysis.category_breakdown.attachment) or 0 }} / 45</td>
+                </tr>
+                <tr>
+                  <td><i class="bi bi-chat-left-dots text-primary me-2"></i>Social Engineering Content</td>
+                  <td class="text-end fw-bold">{{ (analysis.category_breakdown and analysis.category_breakdown.content) or 0 }} / 35</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="cyber-card h-100">
+          <div class="cyber-card-header">
+            <h4 class="cyber-card-title"><i class="bi bi-shield-lock text-cyan"></i> Security Recommendations</h4>
+          </div>
+          <div class="d-flex flex-column gap-3">
+            <div class="d-flex gap-3 align-items-start">
+              <div class="badge-critical p-2 rounded"><i class="bi bi-ban fs-5"></i></div>
+              <div>
+                <strong class="text-white">Email Gateway Rule:</strong>
+                <p class="text-muted small mb-0">{% if analysis.risk_score > 60 %}Immediately quarantine or drop emails matching this sender domain and message signature.{% else %}Standard gateway filtering rules are sufficient.{% endif %}</p>
+              </div>
+            </div>
+            <div class="d-flex gap-3 align-items-start">
+              <div class="badge-high p-2 rounded"><i class="bi bi-eye-slash fs-5"></i></div>
+              <div>
+                <strong class="text-white">User Interaction:</strong>
+                <p class="text-muted small mb-0">{% if analysis.risk_score > 40 %}Do NOT click links, download attachments, or reply to the email. Contact the apparent sender out-of-band.{% else %}Safe to read, but verify sensitive requests before sharing confidential credentials.{% endif %}</p>
+              </div>
+            </div>
+            <div class="d-flex gap-3 align-items-start">
+              <div class="badge-suspicious p-2 rounded"><i class="bi bi-arrow-repeat fs-5"></i></div>
+              <div>
+                <strong class="text-white">Sender Authentication:</strong>
+                <p class="text-muted small mb-0">SPF: <strong>{{ analysis.spf_status }}</strong> | DKIM: <strong>{{ analysis.dkim_status }}</strong> | DMARC: <strong>{{ analysis.dmarc_status }}</strong></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. HEADER ANALYSIS TAB -->
+  <div class="tab-pane fade" id="tab-headers" role="tabpanel">
+    <!-- Authentication Badges Strip -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <div class="cyber-card text-center">
+          <span class="text-muted small d-block mb-1">SPF STATUS</span>
+          <span class="badge {% if analysis.spf_status == 'pass' %}badge-safe{% elif analysis.spf_status == 'fail' %}badge-critical{% elif analysis.spf_status == 'softfail' %}badge-suspicious{% else %}badge-neutral{% endif %} fs-6 py-2 px-3">
+            {{ analysis.spf_status | upper }}
+          </span>
+          <small class="text-muted d-block mt-2">{{ analysis.auth_summary.spf.details or 'No detail' }}</small>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="cyber-card text-center">
+          <span class="text-muted small d-block mb-1">DKIM STATUS</span>
+          <span class="badge {% if analysis.dkim_status == 'pass' %}badge-safe{% elif analysis.dkim_status == 'fail' %}badge-critical{% else %}badge-neutral{% endif %} fs-6 py-2 px-3">
+            {{ analysis.dkim_status | upper }}
+          </span>
+          <small class="text-muted d-block mt-2">{{ analysis.auth_summary.dkim.details or 'No detail' }}</small>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="cyber-card text-center">
+          <span class="text-muted small d-block mb-1">DMARC EVALUATION</span>
+          <span class="badge {% if analysis.dmarc_status == 'pass' %}badge-safe{% elif analysis.dmarc_status == 'fail' %}badge-critical{% else %}badge-neutral{% endif %} fs-6 py-2 px-3">
+            {{ analysis.dmarc_status | upper }}
+          </span>
+          <small class="text-muted d-block mt-2">{{ analysis.auth_summary.dmarc.details or 'No detail' }}</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Envelope Details Table -->
+    <div class="cyber-card mb-4">
+      <div class="cyber-card-header">
+        <h4 class="cyber-card-title"><i class="bi bi-envelope-paper text-cyan"></i> Envelope Fields & Identifiers</h4>
+      </div>
+      <div class="table-responsive">
+        <table class="cyber-table">
+          <tbody>
+            <tr>
+              <th style="width: 180px;">From</th>
+              <td><code>{{ analysis.sender }}</code></td>
+            </tr>
+            <tr>
+              <th>Reply-To</th>
+              <td><code>{{ analysis.reply_to or 'None' }}</code></td>
+            </tr>
+            <tr>
+              <th>Return-Path</th>
+              <td><code>{{ analysis.return_path or 'None' }}</code></td>
+            </tr>
+            <tr>
+              <th>Date Header</th>
+              <td>{{ analysis.date_header or 'None' }}</td>
+            </tr>
+            <tr>
+              <th>Message-ID</th>
+              <td><code>{{ analysis.message_id or 'Missing' }}</code></td>
+            </tr>
+            <tr>
+              <th>Sending IP Address</th>
+              <td><code>{{ analysis.sending_ip }}</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Routing Chain Hops Table -->
+    {% if analysis.routing_summary %}
+    <div class="cyber-card">
+      <div class="cyber-card-header">
+        <h4 class="cyber-card-title"><i class="bi bi-hdd-network text-cyan"></i> Email Routing Path ({{ analysis.routing_hops }} Relay Hops)</h4>
+      </div>
+      <div class="table-responsive">
+        <table class="cyber-table">
+          <thead>
+            <tr>
+              <th>Hop</th>
+              <th>Relay Host (From)</th>
+              <th>Receiving Host (By)</th>
+              <th>IP Address</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for hop in analysis.routing_summary %}
+            <tr>
+              <td><span class="badge bg-secondary">#{{ hop.hop_number }}</span></td>
+              <td><code>{{ hop.from_host }}</code></td>
+              <td><code>{{ hop.by_host }}</code></td>
+              <td><code>{{ hop.ip }}</code></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- 3. URL INTELLIGENCE TAB -->
+  <div class="tab-pane fade" id="tab-urls" role="tabpanel">
+    <div class="cyber-card">
+      <div class="cyber-card-header d-flex justify-content-between align-items-center">
+        <h4 class="cyber-card-title"><i class="bi bi-link-45deg text-cyan"></i> Extracted URLs ({{ analysis.url_count }})</h4>
+        <span class="text-danger small fw-bold">{{ analysis.suspicious_url_count }} flagged suspicious</span>
+      </div>
+
+      {% if analysis.urls %}
+      <div class="table-responsive">
+        <table class="cyber-table">
+          <thead>
+            <tr>
+              <th>Target URL</th>
+              <th>Domain / Host</th>
+              <th>Status</th>
+              <th>Heuristic Findings</th>
+              <th>Threat Intel</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in analysis.urls %}
+            <tr>
+              <td style="max-width: 280px; word-break: break-all;">
+                <code>{{ u.url }}</code>
+                {% if u.anchor_text %}
+                <div class="text-muted small mt-1">Anchor: <em>"{{ u.anchor_text }}"</em></div>
+                {% endif %}
+              </td>
+              <td><code>{{ u.domain }}</code></td>
+              <td>
+                <span class="badge {% if u.is_suspicious %}badge-critical{% else %}badge-safe{% endif %}">
+                  {% if u.is_suspicious %}SUSPICIOUS{% else %}CLEAN{% endif %}
+                </span>
+              </td>
+              <td>
+                {% if u.reasons %}
+                  {% for r in u.reasons %}
+                  <span class="badge bg-danger-subtle text-danger me-1 mb-1">{{ r }}</span>
+                  {% endfor %}
+                {% else %}
+                  <span class="text-muted small">No anomalies</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if u.threat_intel_urlhaus %}
+                  <span class="badge {% if u.threat_intel_urlhaus.status == 'malicious' %}badge-critical{% else %}badge-neutral{% endif %}">
+                    URLhaus: {{ u.threat_intel_urlhaus.status }}
+                  </span>
+                {% else %}
+                  <span class="text-muted small">Pending</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-muted mb-0 py-3 text-center">No hyperlinks detected in email body or HTML.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- 4. ATTACHMENT ANALYSIS TAB -->
+  <div class="tab-pane fade" id="tab-attachments" role="tabpanel">
+    <div class="cyber-card">
+      <div class="cyber-card-header d-flex justify-content-between align-items-center">
+        <h4 class="cyber-card-title"><i class="bi bi-paperclip text-cyan"></i> Email Attachments ({{ analysis.attachment_count }})</h4>
+        <span class="text-danger small fw-bold">{{ analysis.suspicious_attachment_count }} flagged dangerous</span>
+      </div>
+
+      {% if analysis.attachments %}
+      <div class="table-responsive">
+        <table class="cyber-table">
+          <thead>
+            <tr>
+              <th>Filename</th>
+              <th>MIME Content Type</th>
+              <th>Size</th>
+              <th>SHA-256 Checksum</th>
+              <th>Threat Risk</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for att in analysis.attachments %}
+            <tr>
+              <td>
+                <i class="bi bi-file-earmark-code me-1 text-cyan"></i>
+                <strong>{{ att.filename }}</strong>
+              </td>
+              <td><code>{{ att.content_type }}</code></td>
+              <td>{{ att.size_formatted }}</td>
+              <td>
+                <span class="cyber-code-inline" title="{{ att.sha256 }}">{{ att.sha256[:20] }}...</span>
+              </td>
+              <td>
+                <span class="badge {% if att.is_suspicious %}badge-critical{% else %}badge-safe{% endif %}">
+                  {% if att.is_suspicious %}HIGH RISK{% else %}BENIGN{% endif %}
+                </span>
+                {% if att.reasons %}
+                <div class="small text-danger mt-1">{{ att.reasons | join(', ') }}</div>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-muted mb-0 py-3 text-center">No attachments were included with this email message.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- 5. THREAT INDICATORS TAB -->
+  <div class="tab-pane fade" id="tab-indicators" role="tabpanel">
+    <div class="cyber-card">
+      <div class="cyber-card-header">
+        <h4 class="cyber-card-title"><i class="bi bi-exclamation-triangle text-cyan"></i> Detected Threat Indicators ({{ analysis.indicators | length }})</h4>
+      </div>
+
+      {% if analysis.indicators %}
+        {% for ind in analysis.indicators %}
+        <div class="indicator-item sev-{{ ind.severity }}">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <div>
+              <span class="badge {% if ind.severity == 'Critical' %}badge-critical{% elif ind.severity == 'High' %}badge-high{% elif ind.severity == 'Medium' %}badge-suspicious{% else %}badge-safe{% endif %} me-2">
+                {{ ind.severity | upper }}
+              </span>
+              <span class="badge bg-secondary me-2">{{ ind.category }}</span>
+              <strong class="text-white">{{ ind.name }}</strong>
+            </div>
+            <span class="text-muted small">Assigned Weight: <strong class="text-cyan">+{{ ind.assigned_score }}</strong></span>
+          </div>
+
+          <p class="text-muted small mb-2">{{ ind.description }}</p>
+
+          <div class="p-2 mb-2 rounded" style="background-color: #080d1a; border: 1px solid var(--border-color); font-size: 0.82rem;">
+            <strong class="text-cyan"><i class="bi bi-search me-1"></i>Evidence:</strong>
+            <span class="text-white">{{ ind.evidence }}</span>
+          </div>
+
+          <div class="text-muted" style="font-size: 0.8rem;">
+            <strong class="text-warning"><i class="bi bi-shield-check me-1"></i>Recommended Action:</strong> {{ ind.recommended_action }}
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+      <p class="text-muted mb-0 py-3 text-center">No threat indicators triggered. Email scored clean.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- 6. RAW EMAIL TAB -->
+  <div class="tab-pane fade" id="tab-raw" role="tabpanel">
+    <div class="cyber-card">
+      <div class="cyber-card-header d-flex justify-content-between align-items-center">
+        <h4 class="cyber-card-title"><i class="bi bi-code text-cyan"></i> Message Preview & Source</h4>
+        <button class="btn btn-sm btn-outline-secondary" onclick="copyText('rawEmailDisplay', this)">
+          <i class="bi bi-clipboard"></i> Copy Source
+        </button>
+      </div>
+      <pre id="rawEmailDisplay" class="cyber-textarea p-3" style="max-height: 450px; overflow-y: auto;">{{ analysis.raw_email_preview or analysis.body_full }}</pre>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // Render Vector Subscores Radar / Bar Chart
+  const vectorCtx = document.getElementById('vectorRadarChart');
+  if (vectorCtx) {
+    const rawBreakdown = {{ analysis.category_breakdown | tojson }};
+    new Chart(vectorCtx, {
+      type: 'radar',
+      data: {
+        labels: ['Header (40)', 'URL (45)', 'Attachment (45)', 'Content (35)', 'Threat Intel (40)'],
+        datasets: [{
+          label: 'Calculated Threat Subscore',
+          data: [
+            rawBreakdown.header || 0,
+            rawBreakdown.url || 0,
+            rawBreakdown.attachment || 0,
+            rawBreakdown.content || 0,
+            rawBreakdown.threat_intel || 0
+          ],
+          backgroundColor: 'rgba(6, 182, 212, 0.25)',
+          borderColor: '#06b6d4',
+          pointBackgroundColor: '#06b6d4',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          r: {
+            angleLines: { color: 'rgba(255,255,255,0.1)' },
+            grid: { color: 'rgba(255,255,255,0.1)' },
+            pointLabels: { color: '#94a3b8', font: { size: 10 } },
+            ticks: { display: false }
+          }
+        },
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+  }
+</script>
+{% endblock %}

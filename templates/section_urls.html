@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}URL Intelligence // BaitDetect{% endblock %}
+{% block header_title %}URL & Domain Threat Intelligence{% endblock %}
+{% block header_subtitle %}Passive, non-executing link forensic inspection and reputation mapping{% endblock %}
+
+{% block content %}
+<div class="row g-4 mb-4">
+  <div class="col-md-3">
+    <div class="cyber-card text-center py-3">
+      <i class="bi bi-shield-x text-danger display-6 mb-2 d-block"></i>
+      <h5 class="text-white fw-bold mb-1">Direct IP Hostnames</h5>
+      <p class="text-muted small mb-0"><code>http://192.168.1.1/login</code> bypasses domain reputation and DNS blockers.</p>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="cyber-card text-center py-3">
+      <i class="bi bi-arrows-collapse text-warning display-6 mb-2 d-block"></i>
+      <h5 class="text-white fw-bold mb-1">URL Shorteners</h5>
+      <p class="text-muted small mb-0">bit.ly, tinyurl, t.co conceal final phishing endpoints from email scanners.</p>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="cyber-card text-center py-3">
+      <i class="bi bi-translate text-info display-6 mb-2 d-block"></i>
+      <h5 class="text-white fw-bold mb-1">Homographs & Punycode</h5>
+      <p class="text-muted small mb-0">Cyrillic lookalikes (e.g. <code>xn--</code>) mimicking familiar corporate brands.</p>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="cyber-card text-center py-3">
+      <i class="bi bi-cursor-fill text-danger display-6 mb-2 d-block"></i>
+      <h5 class="text-white fw-bold mb-1">Anchor Mismatches</h5>
+      <p class="text-muted small mb-0">Visible text says <code>paypal.com</code> while <code>href</code> points to <code>evil.com</code>.</p>
+    </div>
+  </div>
+</div>
+
+<div class="cyber-card">
+  <div class="cyber-card-header d-flex justify-content-between align-items-center">
+    <h3 class="cyber-card-title"><i class="bi bi-link-45deg text-cyan"></i> Aggregated URLs Across Analyzed Incidents</h3>
+    <span class="text-muted small">Total Extracted: {{ total_urls_count }}</span>
+  </div>
+
+  {% if urls_list %}
+  <div class="table-responsive">
+    <table class="cyber-table">
+      <thead>
+        <tr>
+          <th>Analysis ID</th>
+          <th>URL & Anchor</th>
+          <th>Domain</th>
+          <th>Status</th>
+          <th>Detected Anomalies</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in urls_list %}
+        <tr>
+          <td><code class="cyber-code-inline">{{ item.analysis_id }}</code></td>
+          <td style="max-width: 320px; word-break: break-all;">
+            <code>{{ item.url }}</code>
+            {% if item.anchor_text %}
+            <div class="text-muted small mt-1">Anchor: <em>"{{ item.anchor_text }}"</em></div>
+            {% endif %}
+          </td>
+          <td><code>{{ item.domain }}</code></td>
+          <td>
+            <span class="badge {% if item.is_suspicious %}badge-critical{% else %}badge-safe{% endif %}">
+              {% if item.is_suspicious %}SUSPICIOUS{% else %}CLEAN{% endif %}
+            </span>
+          </td>
+          <td>
+            {% if item.reasons %}
+              {% for r in item.reasons %}
+              <span class="badge bg-danger-subtle text-danger me-1 mb-1">{{ r }}</span>
+              {% endfor %}
+            {% else %}
+              <span class="text-muted small">Clean</span>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{{ url_for('view_analysis', analysis_id=item.analysis_id) }}" class="btn btn-sm btn-cyber-secondary py-1 px-2">
+              <i class="bi bi-eye"></i> View
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="text-muted text-center py-4 mb-0">No URLs extracted yet. Analyze an email with embedded links to view forensic URL intelligence.</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Header Analysis // BaitDetect{% endblock %}
+{% block header_title %}Email Header & Routing Analysis{% endblock %}
+{% block header_subtitle %}Inspect SPF/DKIM/DMARC authentication, envelope mismatches, and relay hops{% endblock %}
+
+{% block content %}
+<div class="row g-4 mb-4">
+  <div class="col-lg-6">
+    <div class="cyber-card h-100">
+      <div class="cyber-card-header">
+        <h3 class="cyber-card-title"><i class="bi bi-shield-check text-cyan"></i> Authentication Protocols Explained</h3>
+      </div>
+      <div class="d-flex flex-column gap-3 small">
+        <div>
+          <strong class="text-white">SPF (Sender Policy Framework):</strong>
+          <p class="text-muted mb-0">Specifies authorized sending IP addresses in domain DNS TXT records. Our analyzer checks headers and queries live DNS, clearly separating <code>FAIL</code> (unauthorized host) from <code>MISSING</code> (no policy declared).</p>
+        </div>
+        <div>
+          <strong class="text-white">DKIM (DomainKeys Identified Mail):</strong>
+          <p class="text-muted mb-0">Verifies cryptographic public-key signatures ensuring message body and headers were not altered in transit.</p>
+        </div>
+        <div>
+          <strong class="text-white">DMARC (Domain-based Message Authentication):</strong>
+          <p class="text-muted mb-0">Combines SPF and DKIM with domain alignment policy (<code>p=reject</code>, <code>p=quarantine</code>, <code>p=none</code>), preventing display name and domain spoofing.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="cyber-card h-100">
+      <div class="cyber-card-header">
+        <h3 class="cyber-card-title"><i class="bi bi-diagram-3 text-cyan"></i> Envelope Mismatch Detection</h3>
+      </div>
+      <div class="d-flex flex-column gap-3 small">
+        <div>
+          <strong class="text-warning">From vs. Reply-To Mismatch:</strong>
+          <p class="text-muted mb-0">Attackers display a legitimate brand in the <code>From:</code> header but configure <code>Reply-To:</code> to redirect responses to a burner address or free-mail account (Gmail, ProtonMail).</p>
+        </div>
+        <div>
+          <strong class="text-danger">Display Name Spoofing:</strong>
+          <p class="text-muted mb-0">The human-readable sender name claims to be "Microsoft Security" or "CEO" while the underlying SMTP address belongs to an arbitrary unauthenticated domain.</p>
+        </div>
+        <div>
+          <strong class="text-info">Received Hops Analysis:</strong>
+          <p class="text-muted mb-0">Traces message transit across MTAs from origin to destination, isolating the true sending IP and flagging anomalous routing patterns.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Header Records from Recent Analyses -->
+<div class="cyber-card">
+  <div class="cyber-card-header d-flex justify-content-between align-items-center">
+    <h3 class="cyber-card-title"><i class="bi bi-clock-history text-cyan"></i> Authentication Status Across Recent Emails</h3>
+    <a href="{{ url_for('analyze_view') }}" class="btn-cyber-primary btn-sm">Analyze New Header</a>
+  </div>
+
+  {% if analyses %}
+  <div class="table-responsive">
+    <table class="cyber-table">
+      <thead>
+        <tr>
+          <th>Analysis ID</th>
+          <th>Sender</th>
+          <th>Subject</th>
+          <th>SPF</th>
+          <th>DKIM</th>
+          <th>DMARC</th>
+          <th>Routing Hops</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in analyses %}
+        <tr>
+          <td><code class="cyber-code-inline">{{ a.id }}</code></td>
+          <td class="text-truncate" style="max-width: 180px;">{{ a.sender or 'Unknown' }}</td>
+          <td class="text-truncate" style="max-width: 220px;">{{ a.subject or '(No Subject)' }}</td>
+          <td>
+            <span class="badge {% if a.spf_status == 'pass' %}badge-safe{% elif a.spf_status == 'fail' %}badge-critical{% elif a.spf_status == 'softfail' %}badge-suspicious{% else %}badge-neutral{% endif %}">
+              {{ a.spf_status | upper }}
+            </span>
+          </td>
+          <td>
+            <span class="badge {% if a.dkim_status == 'pass' %}badge-safe{% elif a.dkim_status == 'fail' %}badge-critical{% else %}badge-neutral{% endif %}">
+              {{ a.dkim_status | upper }}
+            </span>
+          </td>
+          <td>
+            <span class="badge {% if a.dmarc_status == 'pass' %}badge-safe{% elif a.dmarc_status == 'fail' %}badge-critical{% else %}badge-neutral{% endif %}">
+              {{ a.dmarc_status | upper }}
+            </span>
+          </td>
+          <td><span class="badge bg-secondary">{{ a.routing_hops or 0 }} hops</span></td>
+          <td>
+            <a href="{{ url_for('view_analysis', analysis_id=a.id) }}#tab-headers" class="btn btn-sm btn-cyber-secondary py-1 px-2">
+              <i class="bi bi-eye"></i> Inspect
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="text-muted text-center py-4 mb-0">No email headers analyzed yet. Submit an email to inspect its authentication chain.</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis History // BaitDetect{% endblock %}
+{% block header_title %}Historical Incident Analyses{% endblock %}
+{% block header_subtitle %}Complete audit trail of scanned emails, risk scores, and exported reports{% endblock %}
+
+{% block content %}
+<div class="cyber-card mb-4">
+  <div class="cyber-card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <h3 class="cyber-card-title"><i class="bi bi-clock-history text-cyan"></i> Analysis Records</h3>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('export_all_csv') }}" class="btn-cyber-primary btn-sm">
+        <i class="bi bi-file-earmark-spreadsheet"></i> Export Full CSV Summary
+      </a>
+    </div>
+  </div>
+
+  {% if analyses %}
+  <div class="table-responsive">
+    <table class="cyber-table">
+      <thead>
+        <tr>
+          <th>Analysis ID</th>
+          <th>Date (UTC)</th>
+          <th>Sender</th>
+          <th>Subject</th>
+          <th>Score</th>
+          <th>Risk Level</th>
+          <th>Indicators</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in analyses %}
+        <tr>
+          <td><code class="cyber-code-inline">{{ a.id }}</code></td>
+          <td class="text-muted" style="font-size: 0.8rem;">{{ a.created_at[:16].replace('T', ' ') }}</td>
+          <td class="text-truncate" style="max-width: 180px;">{{ a.sender or 'Unknown' }}</td>
+          <td class="text-truncate" style="max-width: 220px;">{{ a.subject or '(No Subject)' }}</td>
+          <td>
+            <span class="fw-bold fs-6 {% if a.risk_score > 80 %}text-danger{% elif a.risk_score > 60 %}text-warning{% elif a.risk_score > 40 %}text-warning{% else %}text-success{% endif %}">
+              {{ a.risk_score }}
+            </span><small class="text-muted">/100</small>
+          </td>
+          <td>
+            <span class="badge {% if 'Critical' in a.risk_level %}badge-critical{% elif 'High' in a.risk_level %}badge-high{% elif 'Suspicious' in a.risk_level %}badge-suspicious{% else %}badge-safe{% endif %}">
+              {{ a.risk_level }}
+            </span>
+          </td>
+          <td>
+            <span class="badge bg-secondary">{{ a.total_indicators_count }} indicators</span>
+          </td>
+          <td>
+            <div class="d-flex gap-1">
+              <a href="{{ url_for('view_analysis', analysis_id=a.id) }}" class="btn btn-sm btn-cyber-secondary py-1 px-2" title="Inspect">
+                <i class="bi bi-eye"></i> View
+              </a>
+              <a href="{{ url_for('download_pdf', analysis_id=a.id) }}" class="btn btn-sm btn-outline-info py-1 px-2" title="PDF Report">
+                <i class="bi bi-file-pdf"></i>
+              </a>
+              <a href="{{ url_for('export_json', analysis_id=a.id) }}" class="btn btn-sm btn-outline-secondary py-1 px-2" title="JSON">
+                <i class="bi bi-code"></i>
+              </a>
+              <form action="{{ url_for('delete_analysis_endpoint', analysis_id=a.id) }}" method="POST" onsubmit="return confirm('Delete this record?');" style="display:inline;">
+                <button type="submit" class="btn btn-sm btn-outline-danger py-1 px-2" title="Delete">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="text-center py-5 text-muted">
+    <i class="bi bi-journal-x display-6 d-block mb-3 text-dim"></i>
+    <p>No historical analysis records found.</p>
+    <a href="{{ url_for('analyze_view') }}" class="btn-cyber-primary btn-sm">Analyze Your First Email</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

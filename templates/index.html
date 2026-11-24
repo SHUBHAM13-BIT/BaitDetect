@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Overview // BaitDetect{% endblock %}
+{% block header_title %}Security Operations Overview{% endblock %}
+{% block header_subtitle %}Real-time email threat monitoring and heuristic indicators{% endblock %}
+
+{% block content %}
+<!-- Metric KPI Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-md-3 col-sm-6">
+    <div class="cyber-card">
+      <div class="metric-box">
+        <div class="metric-icon-wrap" style="background: rgba(6,182,212,0.15); color: var(--accent-cyan);">
+          <i class="bi bi-inboxes"></i>
+        </div>
+        <div>
+          <h3 class="metric-value">{{ stats.total_analyzed }}</h3>
+          <p class="metric-label">Total Analyzed</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3 col-sm-6">
+    <div class="cyber-card">
+      <div class="metric-box">
+        <div class="metric-icon-wrap" style="background: rgba(239,68,68,0.15); color: var(--threat-critical);">
+          <i class="bi bi-shield-slash"></i>
+        </div>
+        <div>
+          <h3 class="metric-value text-danger">{{ stats.threats_detected }}</h3>
+          <p class="metric-label">Threats Detected</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3 col-sm-6">
+    <div class="cyber-card">
+      <div class="metric-box">
+        <div class="metric-icon-wrap" style="background: rgba(245,158,11,0.15); color: var(--threat-suspicious);">
+          <i class="bi bi-exclamation-octagon"></i>
+        </div>
+        <div>
+          <h3 class="metric-value text-warning">{{ stats.suspicious_emails }}</h3>
+          <p class="metric-label">Suspicious / Moderate</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3 col-sm-6">
+    <div class="cyber-card">
+      <div class="metric-box">
+        <div class="metric-icon-wrap" style="background: rgba(16,185,129,0.15); color: var(--threat-safe);">
+          <i class="bi bi-shield-check"></i>
+        </div>
+        <div>
+          <h3 class="metric-value text-success">{{ stats.safe_emails }}</h3>
+          <p class="metric-label">Clean / Safe Emails</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Charts & Quick Triage Row -->
+<div class="row g-4 mb-4">
+  <div class="col-lg-5">
+    <div class="cyber-card h-100">
+      <div class="cyber-card-header">
+        <h3 class="cyber-card-title"><i class="bi bi-pie-chart text-cyan"></i> Threat Risk Distribution</h3>
+      </div>
+      <div class="d-flex align-items-center justify-content-center" style="height: 240px;">
+        <canvas id="riskDistributionChart"></canvas>
+      </div>
+      <div class="text-center text-muted mt-2" style="font-size: 0.8rem;">
+        <span>Average Risk Score: <strong class="text-white">{{ stats.average_risk_score }}/100</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="cyber-card h-100">
+      <div class="cyber-card-header">
+        <h3 class="cyber-card-title"><i class="bi bi-bar-chart-steps text-cyan"></i> Top Threat Vectors Detected</h3>
+      </div>
+      <div style="height: 250px;">
+        <canvas id="topVectorsChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Analysis Module on Home Page -->
+<div class="cyber-card mb-4">
+  <div class="cyber-card-header d-flex justify-content-between align-items-center">
+    <h3 class="cyber-card-title"><i class="bi bi-lightning-charge text-warning"></i> Fast Threat Triage & Input</h3>
+    <div class="d-flex gap-2">
+      <button class="btn btn-sm btn-outline-secondary" onclick="loadSampleEmail('credential_phish')">
+        <i class="bi bi-key me-1"></i>Sample: Credential Phish
+      </button>
+      <button class="btn btn-sm btn-outline-secondary" onclick="loadSampleEmail('bec_wire')">
+        <i class="bi bi-cash-stack me-1"></i>Sample: BEC Fraud
+      </button>
+      <button class="btn btn-sm btn-outline-secondary" onclick="loadSampleEmail('malware_invoice')">
+        <i class="bi bi-bug me-1"></i>Sample: Malicious Invoice
+      </button>
+      <button class="btn btn-sm btn-outline-secondary" onclick="loadSampleEmail('legitimate_newsletter')">
+        <i class="bi bi-check2-circle me-1"></i>Sample: Legitimate
+      </button>
+    </div>
+  </div>
+
+  <form id="analysisForm" action="{{ url_for('submit_analysis') }}" method="POST" enctype="multipart/form-data">
+    <div id="analysisErrorAlert" class="alert alert-danger py-2 px-3 d-none mb-3"></div>
+
+    <div class="row g-3">
+      <div class="col-lg-8">
+        <label class="form-label text-muted small fw-bold">PASTE RAW EMAIL, RFC 822 HEADERS, OR MESSAGE BODY</label>
+        <textarea id="rawEmailContent" name="raw_content" rows="6" class="cyber-textarea" placeholder="Paste full RFC 822 email, headers, or body here (e.g., From: support@brand.com...)..."></textarea>
+      </div>
+      <div class="col-lg-4 d-flex flex-column justify-content-between">
+        <div>
+          <label class="form-label text-muted small fw-bold">OR UPLOAD EMAIL FILE (.EML, .TXT, .MSG)</label>
+          <div id="emailDropZone" class="drop-zone">
+            <i class="bi bi-cloud-arrow-up display-6 text-muted mb-2 d-block"></i>
+            <span class="small text-muted d-block">Drag & drop .eml file here or click to browse</span>
+            <input type="file" id="emailFileInput" name="email_file" class="d-none" accept=".eml,.txt,.msg,.header">
+          </div>
+          <div id="selectedFileInfo"></div>
+        </div>
+
+        <div class="pt-3">
+          <button type="submit" id="submitAnalysisBtn" class="btn-cyber-primary w-100 justify-content-center py-2">
+            <i class="bi bi-shield-check"></i> Run Comprehensive Threat Analysis
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="analysisLoadingState" class="d-none text-center py-3">
+      <div class="spinner-border text-info me-2" role="status"></div>
+      <span class="text-cyan fw-bold">Parsing headers, evaluating SPF/DKIM/DMARC, checking URLs, and scoring threat indicators...</span>
+    </div>
+  </form>
+</div>
+
+<!-- Recent Analyses Table -->
+<div class="cyber-card">
+  <div class="cyber-card-header d-flex justify-content-between align-items-center">
+    <h3 class="cyber-card-title"><i class="bi bi-clock-history text-cyan"></i> Recent Triage Stream</h3>
+    <a href="{{ url_for('history_view') }}" class="btn btn-sm btn-outline-info">View Full History</a>
+  </div>
+
+  {% if stats.recent_analyses %}
+  <div class="table-responsive">
+    <table class="cyber-table">
+      <thead>
+        <tr>
+          <th>Analysis ID</th>
+          <th>Timestamp</th>
+          <th>Sender</th>
+          <th>Subject</th>
+          <th>Risk Score</th>
+          <th>Risk Level</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in stats.recent_analyses %}
+        <tr>
+          <td><code class="cyber-code-inline">{{ a.id }}</code></td>
+          <td class="text-muted" style="font-size: 0.8rem;">{{ a.created_at[:16].replace('T', ' ') }}</td>
+          <td class="text-truncate" style="max-width: 200px;">{{ a.sender or 'Unknown' }}</td>
+          <td class="text-truncate" style="max-width: 250px;">{{ a.subject or '(No Subject)' }}</td>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <span class="fw-bold">{{ a.risk_score }}</span>
+              <div class="progress flex-grow-1" style="height: 6px; background-color: #1e293b; width: 60px;">
+                <div class="progress-bar {% if a.risk_score > 80 %}bg-danger{% elif a.risk_score > 60 %}bg-warning{% elif a.risk_score > 40 %}bg-warning-subtle{% else %}bg-success{% endif %}"
+                     style="width: {{ a.risk_score }}%"></div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="badge {% if 'Critical' in a.risk_level %}badge-critical{% elif 'High' in a.risk_level %}badge-high{% elif 'Suspicious' in a.risk_level %}badge-suspicious{% else %}badge-safe{% endif %}">
+              {{ a.risk_level }}
+            </span>
+          </td>
+          <td>
+            <a href="{{ url_for('view_analysis', analysis_id=a.id) }}" class="btn btn-sm btn-cyber-secondary py-1 px-2" title="Inspect Analysis">
+              <i class="bi bi-eye"></i> View
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="text-center py-4 text-muted">
+    <i class="bi bi-inbox display-6 d-block mb-2 text-dim"></i>
+    <span>No email analyses in database yet. Try running one of the sample presets above!</span>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // Render Distribution Chart
+  const distCtx = document.getElementById('riskDistributionChart');
+  if (distCtx) {
+    const rawDist = {{ stats.risk_distribution | tojson }};
+    const labels = Object.keys(rawDist).length > 0 ? Object.keys(rawDist) : ['Safe', 'Moderate', 'Suspicious', 'High Risk', 'Critical'];
+    const dataVals = Object.keys(rawDist).length > 0 ? Object.values(rawDist) : [0, 0, 0, 0, 0];
+
+    new Chart(distCtx, {
+      type: 'doughnut',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: dataVals,
+          backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#f97316', '#ef4444'],
+          borderColor: '#0f172a',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { color: '#94a3b8', boxWidth: 12 } }
+        }
+      }
+    });
+  }
+
+  // Render Category Breakdown Bar Chart
+  const vecCtx = document.getElementById('topVectorsChart');
+  if (vecCtx) {
+    const catData = {{ stats.top_categories | tojson }};
+    const labels = Object.keys(catData).length > 0 ? Object.keys(catData) : ['Header', 'URL', 'Content', 'Attachment', 'Auth'];
+    const dataVals = Object.keys(catData).length > 0 ? Object.values(catData) : [0, 0, 0, 0, 0];
+
+    new Chart(vecCtx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Indicators Detected',
+          data: dataVals,
+          backgroundColor: '#06b6d4',
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: { ticks: { color: '#94a3b8' }, grid: { display: false } },
+          y: { ticks: { color: '#94a3b8', stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.05)' } }
+        },
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+  }
+</script>
+{% endblock %}
