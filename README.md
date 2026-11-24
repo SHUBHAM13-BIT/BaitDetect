@@ -5,8 +5,59 @@
 [![Framework: Flask](https://img.shields.io/badge/Framework-Flask_3.1-black.svg)](https://palletsprojects.com/p/flask/)
 [![Report Engine: ReportLab](https://img.shields.io/badge/Reporting-ReportLab_5.1-red.svg)](https://www.reportlab.com/)
 [![Tests: 47 Passed](https://img.shields.io/badge/Tests-47%20Passed-brightgreen.svg)]()
+[![Docker: Ready](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)]()
 
 BaitDetect is a professional-grade cybersecurity platform engineered for Security Operations Centers (SOC), Threat Intelligence Analysts, and enterprise email administrators. It performs deep, non-executing static inspection of suspicious emails, extracting headers, URLs, attachments, and psychological coercion markers to produce an auditable 0–100 threat score and forensic incident reports.
+
+---
+
+## 🚀 Quickstart in 60 Seconds (Run by Anyone)
+
+Anyone viewing this repository can clone and run BaitDetect locally in seconds with zero hassle:
+
+### Option A: Using Docker (Fastest & Cross-Platform)
+```bash
+git clone https://github.com/SHUBHAM13-BIT/BaitDetect.git
+cd BaitDetect
+docker compose up
+```
+👉 Open your browser to: **http://localhost:5000**
+
+---
+
+### Option B: Windows (1-Click Launcher)
+1. Clone or download the repository ZIP.
+2. Double-click **`run.bat`** in the project folder.
+It automatically sets up the environment and opens your browser!
+
+---
+
+### Option C: Linux / macOS
+```bash
+git clone https://github.com/SHUBHAM13-BIT/BaitDetect.git
+cd BaitDetect
+chmod +x run.sh && ./run.sh
+```
+
+---
+
+### Option D: Manual Python Setup (3 Commands)
+```bash
+git clone https://github.com/SHUBHAM13-BIT/BaitDetect.git
+cd BaitDetect
+pip install -r requirements.txt
+python app.py
+```
+👉 Open **http://127.0.0.1:5000**
+
+---
+
+### 📂 Ready-to-Test Sample Emails Included (`samples/`)
+For immediate hands-on testing, drag-and-drop or upload any of the included realistic `.eml` samples:
+- `samples/credential_phishing.eml` — Brand impersonation, suspicious TLD, deceptive hyperlink.
+- `samples/bec_wire_transfer.eml` — CEO executive wire fraud, free-mail Reply-To diversion.
+- `samples/malicious_invoice.eml` — Double extension disguise (`.pdf.exe`) payload.
+- `samples/legitimate_security_advisory.eml` — Validated clean email with authentic SPF/DKIM/DMARC.
 
 ---
 
@@ -70,6 +121,7 @@ Evaluates indicators across Header, URL, Attachment, Content, and Threat Intelli
 - **Database:** SQLite 3 (WAL mode, parameterized queries)
 - **PDF Engine:** ReportLab 5.1 with custom canvas page numbering
 - **Testing:** Pytest 9.2 (47 automated tests)
+- **Containerization:** Docker & Docker Compose
 
 ---
 
@@ -77,13 +129,23 @@ Evaluates indicators across Header, URL, Attachment, Content, and Threat Intelli
 
 ```
 BaitDetect/
+├── Dockerfile                  # Production container definition
+├── docker-compose.yml          # One-click multi-container stack
+├── run.bat                     # 1-Click Windows launcher
+├── run.sh                      # 1-Click Linux / macOS launcher
 ├── app.py                      # Flask Application entry point & REST APIs
 ├── config.py                   # Central configuration & directory loader
 ├── requirements.txt            # Python dependencies
 ├── .env.example                # Environment variable template
-├── .env                        # Local configuration
+├── .env                        # Local configuration (never committed)
 ├── .gitignore                  # Git ignore rules
 ├── verify_system.py            # Standalone end-to-end verification script
+│
+├── samples/                    # Included Ready-to-Test .eml Samples
+│   ├── credential_phishing.eml
+│   ├── bec_wire_transfer.eml
+│   ├── malicious_invoice.eml
+│   └── legitimate_security_advisory.eml
 │
 ├── analyzer/                   # Core Security Analysis Engines
 │   ├── __init__.py
@@ -136,83 +198,16 @@ BaitDetect/
 
 ---
 
-## 4. Installation & Setup (Windows 11)
-
-### Prerequisites
-- Python 3.12+ installed (verify with `python --version`)
-- PowerShell or Windows Command Prompt
-
-### Step 1: Clone or Navigate to Directory
-```powershell
-cd "c:\Users\Shubham Chaudhary\Downloads\BaitDetect"
-```
-
-### Step 2: Create and Activate Virtual Environment
-```powershell
-python -m venv venv
-.\venv\Scripts\Activate.ps1
-```
-
-### Step 3: Install Dependencies
-```powershell
-pip install -r requirements.txt
-```
-
-### Step 4: Configure Environment Variables
-Copy `.env.example` to `.env` (already done by default):
-```powershell
-Copy-Item .env.example .env
-```
-
----
-
-## 5. Running the Application
-
-Start the web application:
-```powershell
-.\venv\Scripts\python.exe app.py
-```
-
-The system will start and be accessible at:
-👉 **http://127.0.0.1:5000**
-
----
-
-## 6. How to Use the System
-
-### A. Analyzing an Email
-1. Open the dashboard at `http://127.0.0.1:5000`.
-2. Navigate to **2. Email Analysis** or use the quick scanner on the **Overview** page.
-3. Paste raw email source or upload a `.eml` / `.txt` file.
-   * *Tip:* Click any of the **Synthetic Test Samples** buttons (**Credential Phish**, **BEC Fraud**, **Malware Invoice**, **Legitimate**) to immediately load realistic scenarios.
-4. Click **Run Comprehensive Threat Analysis**.
-5. Inspect the deep-dive report showing risk gauge, header hops, extracted URLs, attachment hashes, and indicator breakdown.
-
-### B. Exporting Reports
-- Click **Download PDF Report** to view or print the incident PDF.
-- Click **Export JSON** for SIEM/SOAR ingestion.
-- Navigate to **9. Reports & Exports** or **8. Analysis History** to download the aggregate CSV summary.
-
-### C. Using the REST API
-Submit an email programmatically via curl or Python:
-```bash
-curl -X POST http://127.0.0.1:5000/api/v1/analyze \
-     -H "Content-Type: application/json" \
-     -d '{"raw_content": "From: billing@fake.xyz\nSubject: Invoice\n\nClick: http://198.51.100.1/pay"}'
-```
-
----
-
-## 7. Running the Automated Test Suite
+## 4. Running the Automated Test Suite
 
 Run all 47 unit, functional, scenario, and security tests:
-```powershell
-.\venv\Scripts\pytest.exe -v
+```bash
+pytest -v
 ```
 
 Run the standalone end-to-end verification script:
-```powershell
-.\venv\Scripts\python.exe verify_system.py
+```bash
+python verify_system.py
 ```
 
 ### Mandatory Scenarios Verified:
@@ -236,22 +231,9 @@ Run the standalone end-to-end verification script:
 
 ---
 
-## 8. Security Controls & Architecture
+## 5. Security Controls & Architecture
 
 - **Zero Detonation Policy:** No link is visited by an automated browser; no attachment payload is written to disk with execution permissions or executed.
 - **Upload Hardening:** Restricted strictly to `.eml`, `.txt`, `.msg`, and `.header` with filename sanitization.
 - **SQL Injection Defense:** All queries utilize SQLite parameterization (`?` placeholders).
 - **Path Traversal Protection:** User inputs and IDs are sanitized via `secure_filename()` before filesystem access.
-
----
-
-## 9. Project Limitations & Future Scope
-
-### Limitations
-- Dynamic JavaScript-rendered links in HTML bodies that require full DOM evaluation are parsed statically via regex and HTML tokenization.
-- Live VirusTotal scanning requires an active user-provided API key in Settings (URLhaus is enabled without keys).
-
-### Future Improvements
-- Integration with local sandbox environments (Cuckoo / CAPE sandbox) for isolated attachment detonation.
-- Fine-tuned transformer model (e.g. RoBERTa/DeBERTa) for multilingual spear-phishing detection.
-- IMAP/POP3 live mailbox listener for automated continuous threat ingestion.

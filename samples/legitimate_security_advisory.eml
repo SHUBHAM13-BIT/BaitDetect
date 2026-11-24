@@ -1,0 +1,23 @@
+From: "GitHub" <notifications@github.com>
+To: developer@company.com
+Reply-To: support@github.com
+Return-Path: <bounces@github.com>
+Subject: [GitHub] A new security advisory was published for your repository
+Date: Tue, 24 Nov 2026 10:00:00 +0000
+Message-ID: <gh-advisory-2026-98124@github.com>
+Authentication-Results: mx.google.com; spf=pass (google.com: domain of bounces@github.com designates 192.30.252.0 as permitted sender); dkim=pass header.i=@github.com; dmarc=pass (p=REJECT)
+Received: from mail-relay.github.com [192.30.252.12] by mx.google.com; Tue, 24 Nov 2026 10:00:02 +0000
+MIME-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+
+Hi Developer,
+
+A new Dependabot security alert was detected in your repository.
+Package: express (severity: Moderate).
+
+You can review the security advisory details and suggested update pull requests at:
+https://github.com/security/advisories/GHSA-example-test
+
+You are receiving this email because you are watching this repository.
+
+GitHub, Inc. • 88 Colin P Kelly Jr St, San Francisco, CA 94107

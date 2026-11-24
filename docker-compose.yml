@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  baitdetect:
+    build: .
+    image: baitdetect:latest
+    container_name: baitdetect-server
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=5000
+      - DEBUG=False
+    volumes:
+      - reports_data:/app/generated_reports
+      - db_data:/app/database
+
+volumes:
+  reports_data:
+  db_data:
