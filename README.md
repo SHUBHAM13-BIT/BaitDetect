@@ -6,6 +6,7 @@
 [![Report Engine: ReportLab](https://img.shields.io/badge/Reporting-ReportLab_5.1-red.svg)](https://www.reportlab.com/)
 [![Tests: 47 Passed](https://img.shields.io/badge/Tests-47%20Passed-brightgreen.svg)]()
 [![Docker: Ready](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)]()
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/SHUBHAM13-BIT/BaitDetect)
 
 BaitDetect is a professional-grade cybersecurity platform engineered for Security Operations Centers (SOC), Threat Intelligence Analysts, and enterprise email administrators. It performs deep, non-executing static inspection of suspicious emails, extracting headers, URLs, attachments, and psychological coercion markers to produce an auditable 0–100 threat score and forensic incident reports.
 

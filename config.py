@@ -7,10 +7,14 @@ BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
 
 class Config:
-    SECRET_KEY = os.getenv("SECRET_KEY", "dev-cybersecurity-secret-key-change-in-prod-2026")
-    DEBUG = os.getenv("DEBUG", "True").lower() in ("true", "1", "yes")
+    # Production Security: Disable debug mode by default unless explicitly enabled in dev
+    is_cloud_prod = bool(os.getenv("RENDER") or os.getenv("RAILWAY_ENVIRONMENT") or os.getenv("FLY_APP_NAME"))
+    default_debug = "False" if is_cloud_prod else "True"
+    
+    SECRET_KEY = os.getenv("SECRET_KEY", "prod-cybersecurity-secret-key-baitdetect-2026")
+    DEBUG = os.getenv("DEBUG", default_debug).lower() in ("true", "1", "yes")
     PORT = int(os.getenv("PORT", 5000))
-    HOST = os.getenv("HOST", "127.0.0.1")
+    HOST = os.getenv("HOST", "0.0.0.0")
 
     # Threat Intelligence API Keys
     VIRUSTOTAL_API_KEY = os.getenv("VIRUSTOTAL_API_KEY", "").strip()
