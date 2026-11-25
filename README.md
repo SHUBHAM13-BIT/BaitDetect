@@ -1,4 +1,4 @@
-# BaitDetect // AI-Powered Phishing Email Analysis and Detection System
+# BaitDetect // Automated Static Phishing Email Analysis and Detection System
 
 [![Python 3.12+](https://img.shields.io/badge/Python-3.12%2B-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -65,7 +65,7 @@ For immediate hands-on testing, drag-and-drop or upload any of the included real
 ## 1. Key Capabilities & Core Modules
 
 ### 🛡️ A. Email Input Module
-- **Multi-Format Ingestion:** Paste RFC 822 email source, loose headers, or body text directly, or upload `.eml`, `.txt`, `.msg`, and `.header` files.
+- **Multi-Format Ingestion:** Paste RFC 822 email source, loose headers, or body text directly, or upload `.eml` and `.txt` files.
 - **Safe Extraction:** Never executes or detonates uploaded attachments; in-memory stream processing only.
 - **MIME & Plaintext Normalization:** Robust parsing across multipart boundaries, encoded headers, and loose line-by-line dumps.
 
@@ -168,7 +168,7 @@ BaitDetect/
 ├── templates/                  # Frontend HTML Templates (All 10 Sections)
 │   ├── base.html               # Master layout with sidebar & notifications
 │   ├── index.html              # Section 1: Operations Overview & KPI Dashboard
-│   ├── analyze.html            # Section 2: Email Analysis & Ingestion Module
+│   ├── analyze.html            # Section 2: Email Investigation & Security Analysis Module
 │   ├── section_headers.html    # Section 3: Header Analysis & Routing Path
 │   ├── section_urls.html       # Section 4: URL Intelligence & Domain Forensics
 │   ├── section_attachments.html# Section 5: Attachment Security Audit
@@ -235,6 +235,6 @@ python verify_system.py
 ## 5. Security Controls & Architecture
 
 - **Zero Detonation Policy:** No link is visited by an automated browser; no attachment payload is written to disk with execution permissions or executed.
-- **Upload Hardening:** Restricted strictly to `.eml`, `.txt`, `.msg`, and `.header` with filename sanitization.
+- **Upload Hardening:** Restricted strictly to `.eml` and `.txt` with filename sanitization.
 - **SQL Injection Defense:** All queries utilize SQLite parameterization (`?` placeholders).
 - **Path Traversal Protection:** User inputs and IDs are sanitized via `secure_filename()` before filesystem access.

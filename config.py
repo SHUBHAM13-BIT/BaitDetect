@@ -22,7 +22,7 @@ class Config:
 
     # Uploads & Storage
     MAX_CONTENT_LENGTH = int(os.getenv("MAX_CONTENT_LENGTH_MB", 16)) * 1024 * 1024  # default 16MB
-    ALLOWED_EXTENSIONS = {".eml", ".txt", ".msg", ".header", ".headers"}
+    ALLOWED_EXTENSIONS = {".eml", ".txt"}
     UPLOAD_FOLDER = BASE_DIR / os.getenv("UPLOAD_FOLDER", "uploads")
     REPORTS_FOLDER = BASE_DIR / os.getenv("REPORTS_FOLDER", "generated_reports")
     DATABASE_PATH = BASE_DIR / os.getenv("DATABASE_PATH", "database/phishing_analysis.db")

@@ -78,6 +78,20 @@ class EmailParser:
         if not raw_str.strip():
             return {"is_valid": False, "errors": ["Email content is blank."]}
 
+        # Check for Outlook binary (.msg) format (OLE2 Compound Document magic bytes)
+        if raw_bytes.startswith(b"\xd0\xcf\x11\xe0"):
+            return {
+                "is_valid": False,
+                "errors": ["Outlook binary (.msg) format is not supported. Please export or submit the email as an RFC 822 / MIME (.eml or .txt) file."]
+            }
+
+        # Check for unreadable / corrupted binary content (contains null bytes in leading bytes without RFC 822 structure)
+        if b"\x00" in raw_bytes[:1024]:
+            return {
+                "is_valid": False,
+                "errors": ["Corrupted or unreadable email data. File appears to contain binary or non-RFC 822 content."]
+            }
+
         msg = None
         try:
             # Use BytesParser with modern default policy

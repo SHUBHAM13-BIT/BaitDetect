@@ -14,6 +14,30 @@ function initDropZone() {
 
   if (!dropZone || !fileInput) return;
 
+  const ALLOWED_EXTS = [".eml", ".txt"];
+
+  function validateFile(file) {
+    if (!file) return false;
+    const lowerName = file.name.toLowerCase();
+    const hasValidExt = ALLOWED_EXTS.some(ext => lowerName.endsWith(ext));
+    if (!hasValidExt) {
+      showError("Invalid file format. Allowed file extensions: .eml, .txt");
+      clearSelectedFile();
+      return false;
+    }
+    if (file.size === 0) {
+      showError("The selected file is empty. Please select a valid email file.");
+      clearSelectedFile();
+      return false;
+    }
+    if (file.size > 16 * 1024 * 1024) {
+      showError("The selected file exceeds the 16MB maximum upload limit.");
+      clearSelectedFile();
+      return false;
+    }
+    return true;
+  }
+
   dropZone.addEventListener("click", () => fileInput.click());
 
   dropZone.addEventListener("dragover", (e) => {
@@ -29,14 +53,20 @@ function initDropZone() {
     e.preventDefault();
     dropZone.classList.remove("dragover");
     if (e.dataTransfer.files.length > 0) {
-      fileInput.files = e.dataTransfer.files;
-      displaySelectedFile(fileInput.files[0]);
+      const file = e.dataTransfer.files[0];
+      if (validateFile(file)) {
+        fileInput.files = e.dataTransfer.files;
+        displaySelectedFile(file);
+      }
     }
   });
 
   fileInput.addEventListener("change", () => {
     if (fileInput.files.length > 0) {
-      displaySelectedFile(fileInput.files[0]);
+      const file = fileInput.files[0];
+      if (validateFile(file)) {
+        displaySelectedFile(file);
+      }
     }
   });
 

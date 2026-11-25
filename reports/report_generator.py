@@ -142,7 +142,7 @@ class ReportGenerator:
         elements = []
 
         # --- 1. REPORT HEADER ---
-        elements.append(Paragraph("AI-POWERED PHISHING EMAIL ANALYSIS", subtitle_style))
+        elements.append(Paragraph("AUTOMATED STATIC PHISHING EMAIL ANALYSIS", subtitle_style))
         elements.append(Paragraph("CYBERSECURITY INCIDENT INVESTIGATION REPORT", title_style))
         elements.append(Spacer(1, 10))
 

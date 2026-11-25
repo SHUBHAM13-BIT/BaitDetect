@@ -49,7 +49,7 @@ def submit_analysis():
     if uploaded_file and uploaded_file.filename:
         filename = secure_filename(uploaded_file.filename)
         if not allowed_file(filename):
-            flash("Invalid file format. Allowed file extensions: .eml, .txt, .msg, .header", "error")
+            flash("Invalid file format. Allowed file extensions: .eml, .txt", "error")
             return redirect(url_for("analyze_view"))
 
         # Read file safely in memory
@@ -57,6 +57,10 @@ def submit_analysis():
             email_bytes = uploaded_file.read()
         except Exception as e:
             flash(f"Failed to read uploaded file: {str(e)}", "error")
+            return redirect(url_for("analyze_view"))
+
+        if not email_bytes or not email_bytes.strip():
+            flash("The uploaded file is empty. Please upload an email file containing data.", "error")
             return redirect(url_for("analyze_view"))
     elif raw_content:
         email_bytes = raw_content.encode("utf-8", errors="replace")
@@ -250,6 +254,14 @@ def save_settings():
     flash("Settings updated successfully.", "success")
     return redirect(url_for("settings_view"))
 
+# ----------------- ERROR HANDLERS -----------------
+@app.errorhandler(413)
+def request_entity_too_large(error):
+    if request.is_json:
+        return jsonify({"success": False, "error": "File size exceeds the 16MB maximum upload limit."}), 413
+    flash("The uploaded file exceeds the 16MB maximum upload limit. Please upload a smaller file.", "error")
+    return redirect(url_for("analyze_view"))
+
 # ----------------- REST API -----------------
 @app.route("/api/v1/analyze", methods=["POST"])
 def api_analyze():
@@ -258,8 +270,13 @@ def api_analyze():
         raw_content = request.json.get("raw_content", "")
     elif "email_file" in request.files:
         f = request.files["email_file"]
-        if f and f.filename and allowed_file(f.filename):
-            raw_content = f.read().decode("utf-8", errors="replace")
+        if f and f.filename:
+            if not allowed_file(f.filename):
+                return jsonify({"success": False, "error": "Invalid file format. Allowed file extensions: .eml, .txt"}), 400
+            file_bytes = f.read()
+            if not file_bytes or not file_bytes.strip():
+                return jsonify({"success": False, "error": "Uploaded file is empty."}), 400
+            raw_content = file_bytes.decode("utf-8", errors="replace")
     elif "raw_content" in request.form:
         raw_content = request.form.get("raw_content", "")
 
