@@ -105,7 +105,7 @@ Here is your weekly news update.
     }
     response = client.post('/analyze/submit', data=data, content_type='multipart/form-data', follow_redirects=True)
     assert response.status_code == 200
-    assert b"Analysis completed successfully" in response.data
+    assert b"Investigation completed successfully" in response.data
 
 def test_security_file_extension_restriction(client):
     bad_data = {
@@ -132,7 +132,7 @@ def test_upload_valid_eml_file(client):
     data = {'email_file': (io.BytesIO(eml_content), 'bulletin.eml')}
     response = client.post('/analyze/submit', data=data, content_type='multipart/form-data', follow_redirects=True)
     assert response.status_code == 200
-    assert b"Analysis completed successfully" in response.data
+    assert b"Investigation completed successfully" in response.data
 
 def test_upload_valid_txt_file(client):
     txt_content = (
@@ -145,7 +145,7 @@ def test_upload_valid_txt_file(client):
     data = {'email_file': (io.BytesIO(txt_content), 'password_alert.txt')}
     response = client.post('/analyze/submit', data=data, content_type='multipart/form-data', follow_redirects=True)
     assert response.status_code == 200
-    assert b"Analysis completed successfully" in response.data
+    assert b"Investigation completed successfully" in response.data
 
 def test_upload_msg_file_rejection(client):
     data = {'email_file': (io.BytesIO(b"From: test@test.com\r\n\r\nTest"), 'sample.msg')}
@@ -205,7 +205,7 @@ def test_pasted_content_analysis_full_pipeline(client):
     # Test submission via form
     response = client.post('/analyze/submit', data={'raw_content': raw_sample}, follow_redirects=True)
     assert response.status_code == 200
-    assert b"Analysis completed successfully" in response.data
+    assert b"Investigation completed successfully" in response.data
 
     # Test submission via JSON API
     api_response = client.post('/api/v1/analyze', json={'raw_content': raw_sample})

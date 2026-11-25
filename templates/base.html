@@ -38,7 +38,7 @@
       </a>
       <a href="{{ url_for('analyze_view') }}" class="nav-link-cyber {% if request.endpoint == 'analyze_view' %}active{% endif %}">
         <i class="bi bi-envelope-check"></i>
-        <span>2. Email Analysis</span>
+        <span>2. Email Investigation</span>
       </a>
       <a href="{{ url_for('header_analysis_view') }}" class="nav-link-cyber {% if request.endpoint == 'header_analysis_view' %}active{% endif %}">
         <i class="bi bi-diagram-3"></i>
@@ -99,7 +99,7 @@
       </div>
       <div class="d-flex align-items-center gap-2">
         <a href="{{ url_for('analyze_view') }}" class="btn-cyber-primary btn-sm">
-          <i class="bi bi-plus-circle"></i> New Email Analysis
+          <i class="bi bi-plus-circle"></i> New Email Investigation
         </a>
       </div>
     </header>

@@ -87,11 +87,11 @@ def submit_analysis():
         # Save to SQLite Database
         save_analysis(analysis_result)
 
-        flash(f"Analysis completed successfully. Risk Level: {analysis_result['risk_level']}", "success")
+        flash(f"Investigation completed successfully. Risk Level: {analysis_result['risk_level']}", "success")
         return redirect(url_for("view_analysis", analysis_id=analysis_result["id"]))
 
     except Exception as e:
-        flash(f"An unexpected error occurred during analysis: {str(e)}", "error")
+        flash(f"An unexpected error occurred during investigation: {str(e)}", "error")
         return redirect(url_for("analyze_view"))
 
 # ----------------- VIEW SINGLE ANALYSIS -----------------
